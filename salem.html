@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Fetch</title>
+  <style>
+    body{
+        background-color: rgb(220, 86, 144);
+        color: white;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .user-container { 
+        display: flex; 
+        justify-content: space-between;
+        /* padding-left: 200px;
+        padding-right: 200px;  */
+        padding: 8px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-bottom: 1px solid #ccc; 
+        gap: 50px;
+        margin-right: 160px;
+        margin-left: 160px;
+        /* background-color: plum; */
+        /* width: 100%; */
+        /* background-color: palevioletred; */
+    }
+    .user-list { 
+        width: 20%;
+        text-align: center; 
+        /* padding-left: 200px;
+        padding-right: 200px;  */
+              display: flex; 
+        justify-content: space-between;
+                align-items: center;
+                /* padding-right: 150px; */
+        
+        justify-content: center;
+        text-align: center;
+    }
+    /* .actions { 
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    } */
+
+
+
+    .updateBtn
+    {
+        background-color: transparent;
+        border: 1px solid white;
+        color: white;
+        
+    }
+
+        .deleteBtn
+    {
+        background-color: transparent;
+        border: 1px solid white;
+        color: white;
+        
+    }
+
+
+    
+  </style>
+</head>
+<body>
+  <h1>User Management</h1>
+
+
+  <div id="usersList">
+ 
+  </div>
+
+  <div id="sms"></div>
+
+  <h2 style="text-align: center;">Add New User</h2>
+  <input style="align-items: center; text-align: center; width: 280px; height: 38px; border: none; margin-left: 500px;" type="text" id="addItem" placeholder="Enter title">
+
+  <button style="align-items: center; text-align: center; background-color: transparent; color: white; border: 1px solid white; width: 90px; height: 40px; " onclick="addList()">Add List</button>
+
+  <script>
+    const API_URL = 'https://jsonplaceholder.typicode.com/todos';
+
+  
+    function fetchUsers() {
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(users => {
+          const usersList = document.getElementById('usersList');
+          usersList.innerHTML = ''; 
+          const firstThree = users.slice(0,5)
+          firstThree.forEach(user => {
+            const userDiv = document.createElement('div');
+            userDiv.classList.add('user-container');
+
+            userDiv.innerHTML = `
+              <div class="user-list">${user.id}</div>
+              <div class="user-list">${user.title}</div>
+             
+              <div class="actions">
+                <button class="updateBtn" onclick="updateList(${user.id})">Update</button>
+                <button class="deleteBtn" onclick="deleteList(${user.id})">Delete</button>
+              </div>
+            `;
+            usersList.appendChild(userDiv);
+          });
+        })
+        .catch(error => hello.textContent('Error fetching lists:', error));
+    }
+
+
+    function addList() {
+      const name = document.getElementById('addItem').value;
+
+      if (name) {
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name})
+        })
+        .then(response => {
+          
+          if (response.ok) {
+            const sms = document.getElementById("sms")
+            const hello = document.createElement("h1")
+            hello.textContent = `List created! ${name}`
+            sms.appendChild(hello)
+          alert`Added new list ID:`;
+
+          fetchUsers(); 
+        } 
+        })
+        .then(() => {
+          document.getElementById('addItem').value = '';
+          fetchUsers(); 
+        })
+        .catch(error => hello.textContent('Error adding list:', error));
+      } else {
+        alert("Please enter title.");
+      }
+    }
+
+ 
+    function updateList(userId) {
+      const newName = prompt('Enter new list:');
+    
+
+      if (newName) {
+        fetch(`${API_URL}/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        })
+        .then(response => {
+            if (response.ok) {
+            const sms = document.getElementById("sms")
+            const hello = document.createElement("h1")
+            hello.textContent = `List updated! ${newName}`
+            sms.appendChild(hello)
+            alert(`User updated ID: ${userId}`);
+       
+            fetchUsers(); 
+        } 
+        })
+        .then(() => fetchUsers())  
+        .catch(error => hello.textContent('Error updating title:', error));
+      } else {
+        alert("Please enter title.");
+      }
+    }
+
+    function deleteList(userId) {
+      fetch(`${API_URL}/${userId}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+            const sms = document.getElementById("sms")
+            const hello = document.createElement("h1")
+            hello.textContent = `List deleted! ${name}, ${userId}`
+            sms.appendChild(hello)
+         alert(`Deleted list with ID: ${userId}`);
+          fetchUsers(); 
+        } else {
+          hello.textContent('Failed to delete list');
+        }
+      })
+      .catch(error => hello.textContent('Error deleting list:', error));
+    }
+
+ 
+
+    fetchUsers();
+
+  </script>
+</body>
+</html>
